@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll(['id', 'customerName', 'customerPhone', 'category', 'serviceTitle', 'description', 'urgency', 'status', 'createdAt'])
+        && data.id is string && data.id.size() <= 128
+        && data.customerName is string && data.customerName.size() <= 100
+        && data.customerPhone is string && data.customerPhone.size() <= 20
+        && data.category in ['electricity', 'plumbing']
+        && data.serviceTitle is string && data.serviceTitle.size() <= 200
+        && data.description is string && data.description.size() <= 2000
+        && data.urgency in ['urgent', 'normal']
+        && data.status in ['pending', 'accepted', 'on_the_way', 'in_progress', 'completed', 'cancelled']
+        && data.createdAt is string && data.createdAt.size() <= 100;
+    }
+
+    function isValidChat(data) {
+      return data.keys().hasAll(['id', 'orderId', 'sender', 'text', 'timestamp'])
+        && data.id is string && data.id.size() <= 128
+        && data.orderId is string && data.orderId.size() <= 128
+        && data.sender in ['customer', 'technician']
+        && data.text is string && data.text.size() <= 2000
+        && data.timestamp is string && data.timestamp.size() <= 100;
+    }
+
+    function isValidTechnician(data) {
+      return data.keys().hasAll(['id', 'name', 'email', 'recoveryEmail', 'password'])
+        && data.id is string && data.id.size() <= 128
+        && data.name is string && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 150
+        && data.recoveryEmail is string && data.recoveryEmail.size() <= 150
+        && data.password is string && data.password.size() <= 100;
+    }
+
+    // Orders Collection
+    match /orders/{orderId} {
+      allow read: if true;
+      allow create: if isValidId(orderId) && isValidOrder(incoming());
+      allow update: if isValidId(orderId) && isValidOrder(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(orderId);
+    }
+
+    // Chats Collection
+    match /chats/{chatId} {
+      allow read: if true;
+      allow create: if isValidId(chatId) && isValidChat(incoming());
+      allow update: if isValidId(chatId) && isValidChat(incoming()) && incoming().id == existing().id;
+      allow delete: if isValidId(chatId);
+    }
+
+    // Technicians Collection (for credentials and recovery email)
+    match /technicians/{technicianId} {
+      allow read: if true;
+      allow create, update: if isValidId(technicianId) && isValidTechnician(incoming());
+      allow delete: if isValidId(technicianId);
+    }
+
+    // Test collection for boot validation
+    match /test/{docId} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

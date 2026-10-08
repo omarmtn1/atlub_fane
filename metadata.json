@@ -1,0 +1,8 @@
+{
+  "name": "Android Web Studio",
+  "description": "منصة بناء وتطوير تطبيقات الأندرويد والويب التفاعلية (PWA & Android Native UI)",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

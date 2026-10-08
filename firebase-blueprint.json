@@ -1,0 +1,175 @@
+{
+  "entities": {
+    "MaintenanceOrder": {
+      "title": "MaintenanceOrder",
+      "description": "Order submitted by a customer for electrical or plumbing maintenance.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the maintenance order",
+          "maxLength": 128
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Name of the customer who requested the service",
+          "maxLength": 100
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Mobile phone number of the customer",
+          "maxLength": 20
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of maintenance service",
+          "enum": ["electricity", "plumbing"]
+        },
+        "serviceTitle": {
+          "type": "string",
+          "description": "Short title describing the required service",
+          "maxLength": 200
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed explanation of the issue",
+          "maxLength": 2000
+        },
+        "urgency": {
+          "type": "string",
+          "description": "Urgency level of the order",
+          "enum": ["urgent", "normal"]
+        },
+        "status": {
+          "type": "string",
+          "description": "Current workflow status of the order",
+          "enum": ["pending", "accepted", "on_the_way", "in_progress", "completed", "cancelled"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp or relative time when order was created",
+          "maxLength": 100
+        },
+        "price": {
+          "type": "number",
+          "description": "Agreed price in Saudi Riyals"
+        },
+        "scheduledTime": {
+          "type": "string",
+          "description": "Scheduled time for the technician visit",
+          "maxLength": 100
+        },
+        "technicianNotes": {
+          "type": "string",
+          "description": "Technician internal notes",
+          "maxLength": 1000
+        },
+        "cancellationReason": {
+          "type": "string",
+          "description": "Reason provided if the order was cancelled",
+          "maxLength": 500
+        }
+      },
+      "required": ["id", "customerName", "customerPhone", "category", "serviceTitle", "description", "urgency", "status", "createdAt"]
+    },
+    "ChatMessage": {
+      "title": "ChatMessage",
+      "description": "Direct message exchanged between customer and technician for an order.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the chat message",
+          "maxLength": 128
+        },
+        "orderId": {
+          "type": "string",
+          "description": "ID of the order this message belongs to",
+          "maxLength": 128
+        },
+        "sender": {
+          "type": "string",
+          "description": "Sender role of the message",
+          "enum": ["customer", "technician"]
+        },
+        "text": {
+          "type": "string",
+          "description": "Content of the message",
+          "maxLength": 2000
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Formatted time string or ISO timestamp",
+          "maxLength": 100
+        },
+        "type": {
+          "type": "string",
+          "description": "Message category",
+          "enum": ["text", "price_offer", "schedule_proposal"]
+        },
+        "offerPrice": {
+          "type": "number",
+          "description": "Offer price if message is price_offer"
+        },
+        "proposedTime": {
+          "type": "string",
+          "description": "Proposed time for visit if message is schedule_proposal",
+          "maxLength": 100
+        }
+      },
+      "required": ["id", "orderId", "sender", "text", "timestamp"]
+    },
+    "TechnicianProfile": {
+      "title": "TechnicianProfile",
+      "description": "Technician account credentials, password, and registered recovery email for password reset.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for technician account",
+          "maxLength": 128
+        },
+        "name": {
+          "type": "string",
+          "description": "Display name of the technician",
+          "maxLength": 100
+        },
+        "email": {
+          "type": "string",
+          "description": "Registered email address",
+          "maxLength": 150
+        },
+        "recoveryEmail": {
+          "type": "string",
+          "description": "Recovery email address used to reset forgotten password",
+          "maxLength": 150
+        },
+        "password": {
+          "type": "string",
+          "description": "Technician password",
+          "maxLength": 100
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Last updated timestamp",
+          "maxLength": 100
+        }
+      },
+      "required": ["id", "name", "email", "recoveryEmail", "password"]
+    }
+  },
+  "firestore": {
+    "/orders/{orderId}": {
+      "schema": "MaintenanceOrder",
+      "description": "Collection of all customer maintenance orders and updates"
+    },
+    "/chats/{chatId}": {
+      "schema": "ChatMessage",
+      "description": "Collection of chat messages between technicians and customers"
+    },
+    "/technicians/{technicianId}": {
+      "schema": "TechnicianProfile",
+      "description": "Collection of technician credentials and recovery email configurations"
+    }
+  }
+}
